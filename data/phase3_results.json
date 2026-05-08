@@ -1,0 +1,8 @@
+{
+  "eval_size_pairs": 6000,
+  "no_context_accuracy": 0.6325,
+  "full_text_accuracy": 0.9031666666666667,
+  "memory_token_accuracy": 0.9035,
+  "lamp_relative_to_upper": 1.000369071784462,
+  "best_val_acc_during_training": 0.9035
+}

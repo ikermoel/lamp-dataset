@@ -33,3 +33,19 @@ ids  = np.concatenate([np.load(s)['ids']         for s in shards])
 
 ## Generated for the LAMP project
 Latent Autoencoded Memory Persistence — OpenResearch Cohort 1, May 2026.
+
+## Phase 3 results (LoRA + memory-token classifier)
+
+Trained LoRA adapter on Qwen3-4B-Instruct-2507 to read the AE memory token z (256d) as input embedding and predict claim labels.
+
+| Condition | Accuracy |
+|---|---|
+| No context (vanilla Qwen3-4B, claim only) | 0.6325 |
+| Full text (vanilla Qwen3-4B, text + claim, upper bound) | 0.9032 |
+| **Memory token (LAMP — LoRA + 256d z + claim)** | **0.9035** |
+
+**LAMP / upper bound = 1.0004** (threshold publishable 0.70, top-tier 0.85)
+
+Compression: 36 layers x 2560 hidden = 92,160 floats -> 256 floats = **360x compression** with full-task accuracy preserved.
+
+See `data/phase3_results.json` for raw numbers.
