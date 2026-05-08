@@ -1,0 +1,8 @@
+{
+  "ood_examples": 1000,
+  "ood_eval_pairs": 2000,
+  "no_context_accuracy": 0.432,
+  "full_text_accuracy": 0.7815,
+  "memory_token_accuracy": 0.7555,
+  "lamp_relative_to_upper": 0.9667306461932181
+}
