@@ -1,25 +1,35 @@
-# LAMP Synthetic Dataset (binary)
+# LAMP Synthetic Dataset
 
-10,000 synthetic FEVER-style examples in English, generated with **Qwen3-4B-Instruct-2507** on **AMD MI300X** via vLLM, on completely fictional content to avoid parametric contamination.
+10,000 synthetic FEVER-style examples in English, generated with **Qwen3-4B-Instruct-2507** on **AMD MI300X** via vLLM. Texts are completely fictional to avoid parametric contamination.
 
-**Note:** the original 3-class FEVER protocol included a NOT ENOUGH INFO label, but those claims had ~50% label noise (model often produced REFUTES disguised as NEI). To keep label quality high, all NEI claims have been removed. Each example now has 2 claims: one SUPPORTS and one REFUTES.
+## Files
 
-| File | Examples | Claims per example | Total claims |
-|---|---|---|---|
-| `data/dataset.jsonl` | 10,000 | 2 (SUPPORTS, REFUTES) | 20,000 |
-| `data/train.jsonl`   | 7,000  | 2 | 14,000 |
-| `data/eval.jsonl`    | 3,000  | 2 | 6,000 |
+### Text dataset (binary classification: SUPPORTS / REFUTES)
 
-Each example:
-```json
-{
-  "id": 0,
-  "text": "...",
-  "claims": [
-    {"claim": "...", "label": "SUPPORTS"},
-    {"claim": "...", "label": "REFUTES"}
-  ]
-}
+| File | Examples | Claims |
+|---|---|---|
+| `data/dataset.jsonl` | 10,000 | 20,000 |
+| `data/train.jsonl`   | 7,000  | 14,000 |
+| `data/eval.jsonl`    | 3,000  | 6,000 |
+
+### Last-token activations (for LAMP autoencoder training)
+
+Last-token hidden state from each of Qwen3-4B's 36 layers, extracted on the full text of each example (max 512 input tokens, padded left).
+
+Shape per example: `[36, 2560]` (num_layers × hidden_size). Stored as `float16`.
+
+Files in `data/activations/`:
+- `manifest.json` — model name, dimensions
+- `acts_shard_NN.npz` — sharded numpy archives, ~500 examples each, with keys `activations` (`float16[N, 36, 2560]`) and `ids` (`int64[N]`)
+
+Loading example:
+```python
+import glob, numpy as np
+shards = sorted(glob.glob('data/activations/acts_shard_*.npz'))
+acts = np.concatenate([np.load(s)['activations'] for s in shards])
+ids  = np.concatenate([np.load(s)['ids']         for s in shards])
+# acts.shape == (10000, 36, 2560)
 ```
 
-Generated for the LAMP project (Latent Autoencoded Memory Persistence) — OpenResearch Cohort 1, May 2026.
+## Generated for the LAMP project
+Latent Autoencoded Memory Persistence — OpenResearch Cohort 1, May 2026.

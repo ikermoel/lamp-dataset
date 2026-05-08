@@ -1,0 +1,7 @@
+{
+  "model": "Qwen/Qwen3-4B-Instruct-2507",
+  "num_layers": 36,
+  "hidden_dim": 2560,
+  "shard_size": 500,
+  "max_seq_len": 512
+}
