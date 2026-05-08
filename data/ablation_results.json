@@ -1,0 +1,14 @@
+{
+  "single_layer_ae_rel_val_mse": 0.006108333834022349,
+  "multi_layer_ae_rel_val_mse_known": 0.0158,
+  "single_layer_indist_memory_token_acc": 0.8993333333333333,
+  "multi_layer_indist_memory_token_acc": 0.9035,
+  "single_layer_ood_memory_token_acc": 0.7505,
+  "multi_layer_ood_memory_token_acc": 0.7555,
+  "indist_full_text_upper": 0.9031666666666667,
+  "ood_full_text_upper": 0.7815,
+  "single_layer_indist_relative": 0.9957556744786861,
+  "multi_layer_indist_relative": 1.000369071784462,
+  "single_layer_ood_relative": 0.9603326935380678,
+  "multi_layer_ood_relative": 0.9667306461932181
+}
