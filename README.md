@@ -1,51 +1,73 @@
 # LAMP Synthetic Dataset
 
-10,000 synthetic FEVER-style examples in English, generated with **Qwen3-4B-Instruct-2507** on **AMD MI300X** via vLLM. Texts are completely fictional to avoid parametric contamination.
+LAMP is a synthetic, English-language dataset with 10,000 fictional documents and 20,000 FEVER-style claims for binary fact verification. Each document is paired with one supported claim and one refuted claim.
 
-## Files
+The dataset was generated with **Qwen3-4B-Instruct-2507** on **AMD MI300X** via vLLM. All people, organizations, products, and events described in the texts are fictional to reduce the risk of parametric contamination.
 
-### Text dataset (binary classification: SUPPORTS / REFUTES)
+## Dataset contents
 
-| File | Examples | Claims |
+| Path | Contents |
+|---|---|
+| `data/dataset.jsonl` | Full dataset: 10,000 documents and 20,000 claims |
+| `data/train.jsonl` | Training split: 7,000 documents and 14,000 claims |
+| `data/eval.jsonl` | Evaluation split: 3,000 documents and 6,000 claims |
+| `data/qa_dataset.jsonl` | Question-answering version of the dataset |
+| `data/ood_examples.jsonl` | Additional out-of-distribution examples |
+| `data/activations/` | Last-token hidden-state activations for all 10,000 documents |
+
+## Format
+
+The main files use JSON Lines. Each row contains a fictional source text, two claims, their labels, and a numeric ID.
+
+| Field | Type | Description |
 |---|---|---|
-| `data/dataset.jsonl` | 10,000 | 20,000 |
-| `data/train.jsonl`   | 7,000  | 14,000 |
-| `data/eval.jsonl`    | 3,000  | 6,000 |
+| `id` | integer | Unique example identifier |
+| `text` | string | Fictional source document |
+| `claims` | array | Claims paired with the source document |
+| `claims[].claim` | string | Claim to verify |
+| `claims[].label` | string | `SUPPORTS` or `REFUTES` |
 
-### Last-token activations (for LAMP autoencoder training)
+## Mini sample
 
-Last-token hidden state from each of Qwen3-4B's 36 layers, extracted on the full text of each example (max 512 input tokens, padded left).
+The text below is shortened for readability; the claims and label structure match the dataset.
 
-Shape per example: `[36, 2560]` (num_layers × hidden_size). Stored as `float16`.
-
-Files in `data/activations/`:
-- `manifest.json` — model name, dimensions
-- `acts_shard_NN.npz` — sharded numpy archives, ~500 examples each, with keys `activations` (`float16[N, 36, 2560]`) and `ids` (`int64[N]`)
-
-Loading example:
-```python
-import glob, numpy as np
-shards = sorted(glob.glob('data/activations/acts_shard_*.npz'))
-acts = np.concatenate([np.load(s)['activations'] for s in shards])
-ids  = np.concatenate([np.load(s)['ids']         for s in shards])
-# acts.shape == (10000, 36, 2560)
+```json
+{
+  "id": 0,
+  "text": "In 2023, Prague-based telecommunications firm Veridium Commu was founded with a focus on rural connectivity...",
+  "claims": [
+    {
+      "claim": "Veridium Commu launched the 'NexLink' initiative in 2024 with an annual budget of €2.8 million.",
+      "label": "SUPPORTS"
+    },
+    {
+      "claim": "Veridium Commu launched the 'NexLink' initiative in 2025 with an annual budget of €3.5 million.",
+      "label": "REFUTES"
+    }
+  ]
+}
 ```
 
-## Generated for the LAMP project
-Latent Autoencoded Memory Persistence — OpenResearch Cohort 1, May 2026.
+## Activations
 
-## Phase 3 results (LoRA + memory-token classifier)
+`data/activations/` contains the last-token hidden state from each of the model's 36 layers, extracted from the full text of every example with a maximum input length of 512 tokens and left padding.
 
-Trained LoRA adapter on Qwen3-4B-Instruct-2507 to read the AE memory token z (256d) as input embedding and predict claim labels.
+- Shape per example: `[36, 2560]` (`num_layers × hidden_size`)
+- Data type: `float16`
+- `manifest.json`: model and tensor dimensions
+- `acts_shard_NN.npz`: approximately 500 examples per shard, with `activations` and `ids` arrays
 
-| Condition | Accuracy |
-|---|---|
-| No context (vanilla Qwen3-4B, claim only) | 0.6325 |
-| Full text (vanilla Qwen3-4B, text + claim, upper bound) | 0.9032 |
-| **Memory token (LAMP — LoRA + 256d z + claim)** | **0.9035** |
+```python
+import glob
+import numpy as np
 
-**LAMP / upper bound = 1.0004** (threshold publishable 0.70, top-tier 0.85)
+shards = sorted(glob.glob("data/activations/acts_shard_*.npz"))
+activations = np.concatenate([np.load(shard)["activations"] for shard in shards])
+ids = np.concatenate([np.load(shard)["ids"] for shard in shards])
 
-Compression: 36 layers x 2560 hidden = 92,160 floats -> 256 floats = **360x compression** with full-task accuracy preserved.
+# activations.shape == (10000, 36, 2560)
+```
 
-See `data/phase3_results.json` for raw numbers.
+## Project
+
+Generated for **LAMP (Latent Autoencoded Memory Persistence)**, OpenResearch Cohort 1, May 2026.
