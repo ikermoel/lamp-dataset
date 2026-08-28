@@ -70,4 +70,4 @@ ids = np.concatenate([np.load(shard)["ids"] for shard in shards])
 
 ## Project
 
-Generated for **LAMP (Latent Autoencoded Memory Persistence)**, OpenResearch Cohort 1, May 2026.
+Generated for a future research project: **LAMP (Latent Autoencoded Memory Persistence)**.
