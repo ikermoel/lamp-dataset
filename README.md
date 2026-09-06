@@ -1,6 +1,6 @@
 # LAMP Synthetic Dataset
 
-LAMP is a synthetic, English-language dataset with 10,000 fictional documents and 20,000 FEVER-style claims for binary fact verification. Each document is paired with one supported claim and one refuted claim.
+LAMP is a synthetic, English-language dataset with 10,000 fictional documents and 20,000 FEVER-style claims for binary fact verification. Each document is paired with one supported claim and one refuted claim. A separate open-answer question-answering version contains **30,000 question-answer pairs across the same 10,000 documents**, with three questions per document.
 
 The dataset was generated with **Qwen3-4B-Instruct-2507** on **AMD MI300X** via vLLM. All people, organizations, products, and events described in the texts are fictional to reduce the risk of parametric contamination.
 
@@ -11,7 +11,7 @@ The dataset was generated with **Qwen3-4B-Instruct-2507** on **AMD MI300X** via 
 | `data/dataset.jsonl` | Full dataset: 10,000 documents and 20,000 claims |
 | `data/train.jsonl` | Training split: 7,000 documents and 14,000 claims |
 | `data/eval.jsonl` | Evaluation split: 3,000 documents and 6,000 claims |
-| `data/qa_dataset.jsonl` | Question-answering version of the dataset |
+| `data/qa_dataset.jsonl` | 10,000 documents with 30,000 open-answer question-answer pairs (3 per document) |
 | `data/ood_examples.jsonl` | Additional out-of-distribution examples |
 | `data/activations/` | Last-token hidden-state activations for all 10,000 documents |
 
@@ -47,6 +47,43 @@ The text below is shortened for readability; the claims and label structure matc
   ]
 }
 ```
+
+## Open-answer question answering
+
+`data/qa_dataset.jsonl` contains **10,000 JSONL rows and 30,000 question-answer pairs**. Each row groups three questions and their reference answers with one source document. These are open-answer questions, rather than `SUPPORTS` / `REFUTES` labels.
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | integer | Document identifier |
+| `text` | string | Fictional source document |
+| `qas` | array | Three question-answer pairs for the document |
+| `qas[].q` | string | Question about the document |
+| `qas[].a` | string | Reference answer |
+
+The following example preserves the actual questions and answers; the source text is shortened for readability.
+
+```json
+{
+  "id": 0,
+  "text": "In 2023, Prague-based telecommunications firm Veridium Commu was founded with a focus on rural connectivity...",
+  "qas": [
+    {
+      "q": "When was Veridium Commu founded?",
+      "a": "2023"
+    },
+    {
+      "q": "How many customers does Veridium serve?",
+      "a": "420000"
+    },
+    {
+      "q": "What is the average latency?",
+      "a": "28 milliseconds"
+    }
+  ]
+}
+```
+
+This version can support document comprehension and memory experiments: provide the source document as context, then evaluate answers with or without that document available. It complements rule-learning datasets by testing retention of new facts; it does not itself establish generalization to new rule families. To avoid document leakage, keep all questions from the same document in the same train or evaluation partition. The text and QA files can be used independently of the stored activations.
 
 ## Activations
 
